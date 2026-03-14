@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Coffee bean body - slightly tilted oval -->
+  <ellipse cx="32" cy="32" rx="20" ry="28" fill="#6F4E37" transform="rotate(-15 32 32)"/>
+  <!-- Highlight / shine -->
+  <ellipse cx="26" cy="22" rx="8" ry="14" fill="#8B6914" opacity="0.35" transform="rotate(-15 32 32)"/>
+  <!-- Center split line (the characteristic coffee bean crease) -->
+  <path d="M32 6 C28 20, 36 44, 32 58" stroke="#3E2723" stroke-width="2.5" fill="none" stroke-linecap="round" transform="rotate(-15 32 32)"/>
+</svg>

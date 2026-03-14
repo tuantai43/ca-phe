@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Transactions (thu/chi)
+    match /transactions/{docId} {
+      allow read, write: if true;
+    }
+
+    // Saved reports (báo cáo đã lưu)
+    match /savedReports/{docId} {
+      allow read, write: if true;
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
