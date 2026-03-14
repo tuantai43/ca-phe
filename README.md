@@ -1,4 +1,4 @@
-# Dự án: Võng Quán Manager (Simple POS Web App)
+# Dự án: Cà Phê Võng Quán (Simple POS Web App)
 
 ## 1. Mục tiêu
 Xây dựng một ứng dụng web (PWA) quản lý bán hàng cho quán cà phê võng gia đình. 
