@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { Lock } from 'lucide-vue-next';
 import { useAuth } from '../composables/useAuth';
+import { useRouter } from 'vue-router';
 
 const { currentUser, logout } = useAuth()
+const router = useRouter()
+
+const handleLogout = async () => {
+  await logout()
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -17,7 +24,7 @@ const { currentUser, logout } = useAuth()
         chưa được cấp quyền để sử dụng hệ thống.
       </p>
 
-      <button @click="logout"
+      <button @click="handleLogout"
         class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-6 rounded-lg transition-colors w-full">
         Đăng xuất
       </button>
