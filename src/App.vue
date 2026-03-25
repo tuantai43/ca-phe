@@ -6,11 +6,11 @@ const { isLoadingAuth } = useAuth()
 </script>
 
 <template>
-  <div v-if="isLoadingAuth" class="flex h-screen items-center justify-center bg-gray-50">
+  <div v-if="isLoadingAuth" class="flex h-dvh items-center justify-center bg-gray-50">
     <div class="h-12 w-12 animate-spin rounded-full border-4 border-amber-600 border-t-transparent shadow-lg" />
   </div>
   
-  <div v-else class="flex flex-col h-screen bg-gray-50 relative">
+  <div v-else class="flex flex-col h-dvh bg-gray-50 overflow-hidden relative">
     <main class="flex-1 overflow-y-auto">
       <router-view />
     </main>
