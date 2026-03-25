@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Order } from '../types'
+import { ShoppingBag, Bed } from 'lucide-vue-next'
 
 defineProps<{
   orders: Order[]
@@ -13,9 +14,9 @@ defineEmits<{
 
 function getOrderLabel(order: Order): string {
   if (order.type === 'takeaway') {
-    return '🛍️ Mang đi'
+    return 'Mang đi'
   }
-  return '🛏️ Võng ' + order.hammocks.join(', ')
+  return 'Võng ' + order.hammocks.join(', ')
 }
 
 function getOrderTotal(order: Order): number {
@@ -52,8 +53,12 @@ function formatMoney(amount: number): string {
             : 'border-gray-200 bg-gray-50'
       ]"
     >
-      <span class="text-sm font-semibold text-gray-800 whitespace-nowrap">{{ getOrderLabel(order) }}</span>
-      <span v-if="order.items.length > 0" class="text-xs font-medium text-amber-700">
+      <span class="text-sm font-semibold text-gray-800 whitespace-nowrap flex items-center gap-1">
+        <ShoppingBag v-if="order.type === 'takeaway'" class="w-4 h-4 text-emerald-600" />
+        <Bed v-else class="w-4 h-4 text-blue-500" />
+        {{ getOrderLabel(order) }}
+      </span>
+      <span v-if="order.items.length > 0" class="text-xs font-medium text-amber-700 mt-0.5">
         {{ formatMoney(getOrderTotal(order)) }}
       </span>
     </button>

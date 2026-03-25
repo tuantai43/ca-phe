@@ -35,18 +35,18 @@ Hỗ trợ nhiều đơn hàng mở cùng lúc (quản lý theo số võng).
 
 ## 3. Danh sách món (Menu)
 
-| ID        | Tên món    | Giá mang đi | Giá tại võng | Icon (SVG)  |
-| --------- | ---------- | ----------- | ------------ | ----------- |
-| cafe-den  | Cà Phê Đen | 15.000đ     | 20.000đ      | ☕ ly đen   |
-| cafe-sua  | Cà Phê Sữa | 15.000đ     | 20.000đ      | ☕ ly sữa   |
-| nuoc-ngot | Nước Ngọt  | 15.000đ     | 20.000đ      | 🥤 lon đỏ   |
-| nuoc-cam  | Nước Cam   | 15.000đ     | 20.000đ      | 🍊 quả cam  |
-| nuoc-dua  | Nước Dừa   | 15.000đ     | 20.000đ      | 🥥 trái dừa |
-| tra-tac   | Trà Tắc    | 10.000đ     | 15.000đ      | 🍋 ly chanh |
-| rau-ma    | Rau Má     | 15.000đ     | 20.000đ      | 🌿 ly xanh  |
-| nuoc-mia  | Nước Mía   | 10.000đ     | 15.000đ      | 🎋 ly mía   |
+| ID        | Tên món    | Icon (SVG)  |
+| --------- | ---------- | ----------- |
+| cafe-den  | Cà Phê Đen | ☕ ly đen   |
+| cafe-sua  | Cà Phê Sữa | ☕ ly sữa   |
+| nuoc-ngot | Nước Ngọt  | 🥤 lon đỏ   |
+| nuoc-cam  | Nước Cam   | 🍊 quả cam  |
+| nuoc-dua  | Nước Dừa   | 🥥 trái dừa |
+| tra-tac   | Trà Tắc    | 🍋 ly chanh |
+| rau-ma    | Rau Má     | 🌿 ly xanh  |
+| nuoc-mia  | Nước Mía   | 🎋 ly mía   |
 
-> **Ghi chú**: Icon hiển thị bằng SVG tự vẽ (component MenuIcon), không dùng emoji. Mỗi món có hình vẽ riêng biệt, dễ nhận dạng.
+> **Ghi chú Quan Trọng**: Khác với version đầu tiên, **giá bán của từng món (Mang đi / Tại võng) hoàn toàn LINH HOẠT và được fetch trực tiếp từ CSDL `settings/master_data` do Admin cấu hình**. Hình SVG tự vẽ `MenuIcon` không dùng emoji.
 
 - Hiển thị dạng grid 2 cột.
 - Mỗi món là 1 thẻ (card) có: icon, tên món, giá.
@@ -55,9 +55,8 @@ Hỗ trợ nhiều đơn hàng mở cùng lúc (quản lý theo số võng).
 
 ## 4. Đơn hàng (Order)
 
-### 4.1 Trạng thái rỗng
-
-- Hiển thị text "Chưa chọn món nào".
+### 4.1 Trạng thái quản lý (Global Store)
+- Toàn bộ state của Giỏ Hàng (`orders`, `activeOrderId`) được lưu trữ trong `useCartStore` Global. Cho phép thu ngân nhảy sang Tab Sổ Sách báo cáo rồi trỏ lại Trang chủ mà không bị Bay màu hoá đơn dở dang! 
 
 ### 4.2 Khi có món
 

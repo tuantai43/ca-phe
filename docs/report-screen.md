@@ -7,10 +7,9 @@ Hiển thị cảnh báo ngưỡng thuế theo quy định hộ kinh doanh cá t
 
 ## 2. Chọn khoảng thời gian
 
-- Thanh tab ngang trên đầu: **Hôm nay** | **Tháng này** | **Năm nay**.
-- Mặc định chọn "Hôm nay".
-- Khi chọn "Tháng này": hiển thị tháng/năm (VD: "Tháng 03/2026").
-- Khi chọn "Năm nay": hiển thị năm (VD: "Năm 2026").
+- Thanh tab ngang trên đầu: **Ngày** | **Tháng** | **Năm**.
+- Sử dụng cặp Mũi tên (← →) để dịch chuyển Dữ liệu theo dòng thời gian Quá Khứ / Hiện Tại cực chuẩn xác.
+- Mặc định chọn "Ngày (Hôm nay)". Mọi dữ liệu (Biểu đồ, Doanh Thu, Danh sách hoá đơn) đều phản ứng trực tiếp với Date Picker (Arrow Slider) ngày mà Kế toán chọn.
 
 ## 3. Tổng quan (Summary)
 
@@ -49,24 +48,16 @@ Hiển thị ngay sau phần Tổng quan, áp dụng cho khoảng thời gian đ
 
 ## 5. Thống kê chi tiết
 
-### 5.1 Khi chọn "Hôm nay"
+### 5.1 Danh sách Giao Dịch
+- Hiển thị toàn bộ các hoá đơn thuộc khoảng Thời gian Đang chọn. (Mới nhất nằm trên cùng).
+- Mỗi dòng sẽ phân rõ ràng Nhãn (Thu, Chi) và Ngày giờ chuẩn.
 
-- Hiển thị số đơn bán hàng trong ngày.
-- Hiển thị số khoản chi trong ngày.
+### 5.2 Bút Chì Sửa Đơn 
+Kế toán bấm bút chì sẽ rẽ 2 nhánh:
+- **Nếu là Đơn Chi**: Gọi `ExpenseModal` để sửa lại Số tiền tổng hoặc lý do.
+- **Nếu là Đơn Thu (Khách uống)**: Gọi `EditOrderModal` cao cấp. Bày toàn bộ số lượng ly chi tiết trên Order (VD 2 Cafe sữa, 1 Đen). Kế toán tăng giảm số ly, hệ thống ép nhân tự động lại Đơn giá Góc để ra Tổng tiền mới, không cho nhập tay tuỳ tiện.
 
-### 5.2 Khi chọn "Tháng này"
-
-- Danh sách theo ngày (mới nhất lên đầu), mỗi dòng:
-  - Ngày (DD/MM)
-  - Thu | Chi | Lợi nhuận
-- Chỉ hiện những ngày có giao dịch.
-
-### 5.3 Khi chọn "Năm nay"
-
-- Danh sách 12 tháng, mỗi dòng:
-  - Tháng (Tháng 1, Tháng 2, ...)
-  - Thu | Chi | Lợi nhuận
-- Chỉ hiện những tháng có giao dịch.
+*(Tất cả quá trình Sửa/Xoá giao dịch đều sẽ bị Firebase chụp ảnh lại trên `audit_logs`)*
 
 ## 6. Cảnh báo thuế
 

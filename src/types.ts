@@ -40,6 +40,7 @@ export type ExpenseCategory =
 export interface TransactionOrderItem {
   name: string;
   quantity: number;
+  price?: number;
 }
 
 export interface Transaction {
@@ -63,7 +64,7 @@ export interface SavedReportBreakdown {
 
 export interface SavedReport {
   id: string;
-  periodType: "today" | "month" | "year";
+  periodType: "day" | "month" | "year";
   periodLabel: string;
   totalIncome: number;
   totalExpense: number;

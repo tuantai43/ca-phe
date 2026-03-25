@@ -24,22 +24,9 @@ Chi phí ghi vào **ngày thực tế mua** (không phân bổ theo ngày sử d
 
 ## 4. Popup nhập khoản chi
 
-### 4.1 Chọn danh mục (có giá mặc định)
+### 4.1 Chọn danh mục (Có giá động)
 
-Bấm danh mục → tự điền mô tả + giá mặc định vào ô nhập. Người dùng có thể sửa lại giá.
-
-| Danh mục       | Giá mặc định |
-| -------------- | ------------ |
-| 🧊 Tiền đá     | 30.000đ      |
-| 🎋 Tiền mía    | 50.000đ      |
-| 🌿 Tiền rau má | 30.000đ      |
-| 🍋 Tiền tắc    | 20.000đ      |
-| 🍊 Tiền cam    | 50.000đ      |
-| 🥥 Tiền dừa    | 50.000đ      |
-| 🥤 Tiền ly     | 20.000đ      |
-| 🥤 Ống hút     | 10.000đ      |
-| 🛍️ Bịch        | 10.000đ      |
-| 📝 Khác        | 0đ           |
+Danh mục Thu/Chi hiện tại (như Tiền đá, Tiền mía...) cùng với giá mặc định không còn bị hard-code. Toàn bộ danh mục này được thiết lập tại trang Admin thông qua `useMasterData`. Bấm danh mục → tự điền mô tả + lấy giá tự động. Người dùng có thể sửa lại giá tùy ý.
 
 ### 4.2 Mô tả
 

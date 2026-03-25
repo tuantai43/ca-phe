@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { CartItem, OrderType } from '../types'
+import { ReceiptText, X, CheckCircle } from 'lucide-vue-next'
+import MenuIcon from './MenuIcon.vue'
 
 defineProps<{
   items: CartItem[]
@@ -28,7 +30,7 @@ function getPrice(item: CartItem, type: OrderType): number {
   <div class="flex flex-col gap-3">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <h2 class="text-xl font-bold text-gray-800">🧾 Đơn hàng</h2>
+      <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><ReceiptText class="text-gray-500" /> Đơn hàng</h2>
       <button
         v-if="items.length > 0"
         @click="$emit('clear')"
@@ -52,7 +54,7 @@ function getPrice(item: CartItem, type: OrderType): number {
       >
         <!-- Left: icon + name -->
         <div class="flex items-center gap-2 flex-1 min-w-0">
-          <span class="text-2xl flex-shrink-0">{{ cartItem.menuItem.icon }}</span>
+          <span class="w-10 h-10 flex-shrink-0 flex items-center justify-center transform scale-75 origin-left"><MenuIcon :id="cartItem.menuItem.id" /></span>
           <div class="min-w-0">
             <div class="font-semibold text-gray-800 truncate">{{ cartItem.menuItem.name }}</div>
             <div class="text-sm text-gray-500">{{ formatMoney(getPrice(cartItem, orderType)) }}</div>
@@ -65,6 +67,7 @@ function getPrice(item: CartItem, type: OrderType): number {
           <div class="flex items-center gap-0 rounded-lg border border-gray-200 bg-white">
             <button
               @click="$emit('decrement', index)"
+              title="Giảm số lượng"
               class="flex h-12 w-12 items-center justify-center text-xl font-bold text-gray-600 active:bg-gray-100 rounded-l-lg"
             >
               −
@@ -74,6 +77,7 @@ function getPrice(item: CartItem, type: OrderType): number {
             </span>
             <button
               @click="$emit('increment', index)"
+              title="Tăng số lượng"
               class="flex h-12 w-12 items-center justify-center text-xl font-bold text-gray-600 active:bg-gray-100 rounded-r-lg"
             >
               +
@@ -83,9 +87,10 @@ function getPrice(item: CartItem, type: OrderType): number {
           <!-- Delete button -->
           <button
             @click="$emit('removeItem', index)"
+            title="Xoá món khỏi giỏ hàng"
             class="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 text-red-600 text-lg font-bold active:bg-red-200"
           >
-            ✕
+            <X class="w-6 h-6" />
           </button>
         </div>
       </div>
@@ -99,9 +104,9 @@ function getPrice(item: CartItem, type: OrderType): number {
       </div>
       <button
         @click="$emit('confirm')"
-        class="w-full rounded-2xl bg-green-700 py-4 text-xl font-bold text-white shadow-lg active:bg-green-800 min-h-[60px]"
+        class="flex items-center justify-center gap-2 w-full rounded-2xl bg-green-700 py-4 text-xl font-bold text-white shadow-lg active:bg-green-800 min-h-[60px]"
       >
-        ✅ Xác nhận & Thu tiền
+        <CheckCircle class="w-6 h-6" /> Xác nhận & Thu tiền
       </button>
     </div>
   </div>

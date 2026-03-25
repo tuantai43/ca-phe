@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import SalesPage from './pages/SalesPage.vue'
-import FinancePage from './pages/FinancePage.vue'
-import ReportPage from './pages/ReportPage.vue'
+import { useAuth } from './composables/useAuth'
 import BottomNav from './components/BottomNav.vue'
 
-const activeTab = ref('sales')
+const { isLoadingAuth } = useAuth()
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 pb-20">
-    <!-- Pages -->
-    <SalesPage v-if="activeTab === 'sales'" />
-    <FinancePage v-else-if="activeTab === 'finance'" />
-    <ReportPage v-else-if="activeTab === 'report'" />
-
-    <!-- Bottom Navigation -->
-    <BottomNav :active-tab="activeTab" @navigate="activeTab = $event" />
+  <div v-if="isLoadingAuth" class="flex h-screen items-center justify-center bg-gray-50">
+    <div class="h-12 w-12 animate-spin rounded-full border-4 border-amber-600 border-t-transparent shadow-lg" />
+  </div>
+  
+  <div v-else class="flex flex-col h-screen bg-gray-50 relative">
+    <main class="flex-1 overflow-y-auto">
+      <router-view />
+    </main>
+    
+    <!-- Hide navigation on login/denied screens -->
+    <BottomNav v-if="!['/login', '/access-denied'].includes($route?.path)" class="flex-none shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] z-10" />
   </div>
 </template>

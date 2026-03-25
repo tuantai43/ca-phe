@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { TOTAL_HAMMOCKS } from '../data/menu'
+import { ShoppingBag, Bed, ArrowLeft } from 'lucide-vue-next'
 
 const props = defineProps<{
   usedHammocks: number[]
@@ -54,7 +55,7 @@ function confirmHammock() {
             @click="chooseTakeaway"
             class="flex items-center gap-3 rounded-2xl border-2 border-gray-200 bg-white p-4 text-left active:bg-gray-50 min-h-[60px]"
           >
-            <span class="text-3xl">🛍️</span>
+            <div class="p-2 bg-amber-50 text-amber-600 rounded-full"><ShoppingBag class="w-8 h-8" /></div>
             <div>
               <div class="text-lg font-semibold text-gray-800">Mang đi</div>
               <div class="text-sm text-gray-500">Tạo đơn nhanh, thanh toán ngay</div>
@@ -64,7 +65,7 @@ function confirmHammock() {
             @click="chooseHammock"
             class="flex items-center gap-3 rounded-2xl border-2 border-gray-200 bg-white p-4 text-left active:bg-gray-50 min-h-[60px]"
           >
-            <span class="text-3xl">🛏️</span>
+            <div class="p-2 bg-blue-50 text-blue-600 rounded-full"><Bed class="w-8 h-8" /></div>
             <div>
               <div class="text-lg font-semibold text-gray-800">Nằm võng</div>
               <div class="text-sm text-gray-500">Chọn võng, thanh toán sau</div>
@@ -96,9 +97,9 @@ function confirmHammock() {
         <div class="flex gap-3">
           <button
             @click="step = 'choose'"
-            class="flex-1 rounded-xl border-2 border-gray-200 py-3 text-base font-semibold text-gray-600 active:bg-gray-50"
+            class="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-gray-200 py-3 text-base font-semibold text-gray-600 active:bg-gray-50"
           >
-            ← Quay lại
+            <ArrowLeft class="w-5 h-5" /> Quay lại
           </button>
           <button
             @click="confirmHammock"

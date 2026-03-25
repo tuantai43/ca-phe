@@ -1,29 +1,19 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { ExpenseCategory } from '../types'
-import { Pencil, PlusCircle } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { useTransactions } from '../composables/useTransactions'
 import { useMasterData } from '../composables/useMasterData'
+import { PlusCircle, CheckCircle2 } from 'lucide-vue-next'
+import type { ExpenseCategory } from '../types'
 
+const { addTransaction } = useTransactions()
 const { masterData } = useMasterData()
+const router = useRouter()
 
-const props = defineProps<{
-  editId?: string
-  editType?: 'income' | 'expense'
-  editDescription?: string
-  editAmount?: number
-  editCategory?: ExpenseCategory
-}>()
-
-const emit = defineEmits<{
-  save: [description: string, amount: number, category: ExpenseCategory]
-  update: [id: string, description: string, amount: number, category: ExpenseCategory]
-  close: []
-}>()
-
-const isEdit = !!props.editId
-const description = ref(props.editDescription ?? '')
-const amountStr = ref(props.editAmount ? String(props.editAmount) : '0')
-const category = ref<ExpenseCategory>(props.editCategory ?? 'khac')
+const description = ref('')
+const amountStr = ref('0')
+const category = ref<ExpenseCategory>('khac')
+const showSuccess = ref(false)
 
 const amountNumber = computed(() => parseInt(amountStr.value) || 0)
 
@@ -71,7 +61,7 @@ function pressKey(key: string) {
       amountStr.value += key
     }
   }
-  // Giới hạn tối đa 9 ký tự (999.999.999đ)
+  // Giới hạn tối đa 9 ký tự (999.999.999đ) cho an toàn màn hình
   if (amountStr.value.length > 9) {
     amountStr.value = amountStr.value.slice(0, 9)
   }
@@ -85,38 +75,54 @@ function formatDisplay(val: number): string {
   return val.toLocaleString('vi-VN') + 'đ'
 }
 
-function submit() {
+async function submit() {
   if (!description.value.trim() || amountNumber.value <= 0) return
-  if (isEdit && props.editId) {
-    emit('update', props.editId, description.value.trim(), amountNumber.value, category.value)
-  } else {
-    emit('save', description.value.trim(), amountNumber.value, category.value)
+  
+  try {
+    await addTransaction('expense', description.value.trim(), amountNumber.value, category.value)
+    showSuccess.value = true
+    setTimeout(() => {
+      amountStr.value = '0'
+      description.value = ''
+      category.value = 'khac'
+      showSuccess.value = false
+      router.push('/sales')
+    }, 1500)
+  } catch (error) {
+    console.error(error)
+    alert('Lỗi khi lưu khoản chi')
   }
 }
 </script>
 
 <template>
-  <div class="fixed inset-0 z-60 flex items-end justify-center bg-black/40" @click.self="$emit('close')">
-    <div class="w-full max-w-lg rounded-t-2xl bg-white p-5 pb-6 max-h-[90vh] overflow-y-auto">
-      <h2 class="mb-3 text-xl font-bold text-gray-800 flex items-center gap-2">
-        <Pencil v-if="isEdit" class="text-gray-600" />
-        <PlusCircle v-else class="text-red-600" />
-        {{ editType === 'income' ? 'Sửa đơn hàng' : (isEdit ? 'Sửa khoản chi' : 'Nhập khoản chi') }}
-      </h2>
+  <div class="flex flex-col p-4 pb-20 max-w-lg mx-auto">
+    <h2 class="mb-4 text-2xl font-bold text-gray-800 flex items-center gap-2">
+      <PlusCircle class="text-red-600 w-7 h-7" />
+      Nhập khoản chi
+    </h2>
 
-      <!-- Danh mục -->
-      <div v-if="editType !== 'income'" class="mb-3">
-        <label class="mb-2 block text-sm font-medium text-gray-600">Danh mục</label>
+    <div v-if="showSuccess" class="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-300">
+      <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
+        <CheckCircle2 class="w-10 h-10 text-green-600" />
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800">Lưu thành công!</h2>
+      <p class="text-gray-500 mt-2">Đang trở về Màn hình Bán Hàng...</p>
+    </div>
+
+    <div v-else class="flex flex-col">
+      <!-- Danh mục (Kế thừa nguyên bản) -->
+      <div class="mb-4">
+        <label class="mb-2 block text-sm font-bold text-gray-600">Phân loại nhanh</label>
         <div class="flex flex-wrap gap-2">
           <button
             v-for="cat in dynamicCategories"
             :key="cat.id"
             @click="selectCategory(cat)"
             class="rounded-xl border-2 px-3 py-2 text-sm font-medium transition-colors"
-            v-bind:class="{
-              'border-red-400 bg-red-50 text-red-700': category === cat.id,
-              'border-gray-200 bg-white text-gray-600 active:bg-gray-50': category !== cat.id
-            }"
+            :class="category === cat.id
+              ? 'border-red-400 bg-red-50 text-red-700'
+              : 'border-gray-200 bg-white text-gray-600 active:bg-gray-50'"
           >
             {{ cat.label }}
           </button>
@@ -124,8 +130,8 @@ function submit() {
       </div>
 
       <!-- Mô tả -->
-      <div class="mb-3">
-        <label class="mb-2 block text-sm font-medium text-gray-600">Mô tả</label>
+      <div class="mb-4">
+        <label class="mb-2 block text-sm font-bold text-gray-600">Lý do chi chi tiết</label>
         <input
           v-model="description"
           type="text"
@@ -134,54 +140,44 @@ function submit() {
         />
       </div>
 
-      <!-- Số tiền hiển thị -->
-      <div class="mb-2">
-        <label class="mb-2 block text-sm font-medium text-gray-600">Số tiền</label>
+      <!-- Số tiền hiển thị (Cơ chế nhập Numpad cũ) -->
+      <div class="mb-3">
+        <label class="mb-2 block text-sm font-bold text-gray-600">Số tiền xuất quỹ</label>
         <div class="flex items-center justify-between rounded-xl bg-gray-50 border-2 border-gray-200 px-4 py-3">
           <span class="text-3xl font-bold text-gray-800">{{ formatDisplay(amountNumber) }}</span>
           <button
             @click="clearAmount"
-            class="rounded-lg bg-gray-200 px-3 py-1 text-sm font-semibold text-gray-600 active:bg-gray-300"
+            class="rounded-lg bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 active:bg-gray-300"
           >
             Xoá hết
           </button>
         </div>
       </div>
 
-      <!-- Bàn phím số -->
-      <div class="mb-4 grid grid-cols-3 gap-2">
+      <!-- Bàn phím số đặc sản -->
+      <div class="mb-6 grid grid-cols-3 gap-2">
         <button
           v-for="key in numpadKeys"
           :key="key"
           @click="pressKey(key)"
-          class="flex items-center justify-center rounded-xl border-2 border-gray-200 bg-white text-xl font-bold min-h-[56px] active:bg-gray-100 transition-colors"
+          class="flex items-center justify-center rounded-xl border-2 border-gray-200 bg-white text-2xl font-bold min-h-[60px] active:bg-gray-100 transition-colors"
           :class="key === '⌫' ? 'text-red-600' : 'text-gray-800'"
         >
           {{ key }}
         </button>
       </div>
 
-      <!-- Buttons -->
-      <div class="flex gap-3">
-        <button
-          @click="$emit('close')"
-          class="flex-1 rounded-xl border-2 border-gray-200 py-3 text-base font-semibold text-gray-600 active:bg-gray-50 min-h-[56px]"
-        >
-          Huỷ
-        </button>
-        <button
-          @click="submit"
-          :disabled="!description.trim() || amountNumber <= 0"
-          class="flex-1 rounded-xl py-3 text-base font-bold text-white min-h-[56px] transition-colors"
-          :class="!description.trim() || amountNumber <= 0 
-            ? 'bg-gray-300 cursor-not-allowed' 
-            : editType === 'income' 
-              ? 'bg-green-600 active:bg-green-700' 
-              : 'bg-red-600 active:bg-red-700'"
-        >
-          {{ isEdit ? 'Cập nhật' : 'Lưu khoản chi' }}
-        </button>
-      </div>
+      <!-- Button lưu -->
+      <button
+        @click="submit"
+        :disabled="!description.trim() || amountNumber <= 0"
+        class="w-full flex justify-center items-center rounded-2xl py-4 text-xl font-bold text-white shadow-lg transition-colors min-h-[60px]"
+        :class="description.trim() && amountNumber > 0
+          ? 'bg-red-600 active:bg-red-700'
+          : 'bg-gray-300 cursor-not-allowed'"
+      >
+        Lưu Phiếu Chi
+      </button>
     </div>
   </div>
 </template>

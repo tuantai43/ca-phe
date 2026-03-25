@@ -1,30 +1,27 @@
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import {
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp,
-  Timestamp,
+  collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp, Timestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import type {
-  Transaction,
-  TransactionType,
-  ExpenseCategory,
-  TransactionOrderItem,
-  OrderType,
+  Transaction, TransactionType, ExpenseCategory, TransactionOrderItem, OrderType,
 } from "../types";
+import { useAuth } from "./useAuth";
+import { useAuditLog } from "./useAuditLog";
 
 const transactions = ref<Transaction[]>([]);
 let unsubscribe: (() => void) | null = null;
+let listenersCount = 0;
 
 function startListening() {
+  listenersCount++;
   if (unsubscribe) return;
+  
+  const { isAdmin, hasRole } = useAuth();
+  if (!isAdmin() && !hasRole('view_reports')) {
+    return;
+  }
+
   const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
   unsubscribe = onSnapshot(q, (snapshot) => {
     transactions.value = snapshot.docs.map((d) => {
@@ -43,7 +40,20 @@ function startListening() {
             : (data.createdAt ?? Date.now()),
       } as Transaction;
     });
+  }, () => {
+    unsubscribe = null;
   });
+}
+
+function stopListening() {
+  listenersCount--;
+  if (listenersCount <= 0) {
+    if (unsubscribe) {
+      unsubscribe();
+      unsubscribe = null;
+    }
+    listenersCount = 0;
+  }
 }
 
 function isToday(timestamp: number): boolean {
@@ -58,6 +68,9 @@ function isToday(timestamp: number): boolean {
 
 export function useTransactions() {
   onMounted(startListening);
+  onUnmounted(stopListening);
+  
+  const { logAction } = useAuditLog();
 
   const todayTransactions = computed(() =>
     transactions.value
@@ -100,18 +113,23 @@ export function useTransactions() {
   }
 
   async function updateTransaction(
-    id: string,
+    oldTx: Transaction,
     description: string,
     amount: number,
     category?: ExpenseCategory,
+    orderItems?: TransactionOrderItem[]
   ) {
     const data: Record<string, unknown> = { description, amount };
     if (category) data.category = category;
-    await updateDoc(doc(db, "transactions", id), data);
+    if (orderItems) data.orderItems = orderItems;
+    
+    await logAction('UPDATE', 'transactions', oldTx.id, oldTx, { ...oldTx, ...data });
+    await updateDoc(doc(db, "transactions", oldTx.id), data);
   }
 
-  async function deleteTransaction(id: string) {
-    await deleteDoc(doc(db, "transactions", id));
+  async function deleteTransaction(oldTx: Transaction) {
+    await logAction('DELETE', 'transactions', oldTx.id, oldTx);
+    await deleteDoc(doc(db, "transactions", oldTx.id));
   }
 
   return {

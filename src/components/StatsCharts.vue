@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { BarChart2, ShoppingBag, Bed, Trophy } from 'lucide-vue-next'
 import type { Transaction } from '../types'
 
 const props = defineProps<{
@@ -78,7 +79,7 @@ const topItemMax = computed(() => topItems.value.length > 0 ? topItems.value[0].
   <div class="flex flex-col gap-4">
     <!-- Thu / Chi bar -->
     <div class="rounded-2xl bg-white border border-gray-100 p-4 shadow-sm">
-      <h3 class="text-base font-bold text-gray-800 mb-3">📊 Thu / Chi</h3>
+      <h3 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2"><BarChart2 class="w-5 h-5 text-gray-500" /> Thu / Chi</h3>
       <div class="flex flex-col gap-3">
         <div>
           <div class="flex justify-between text-sm mb-1">
@@ -109,7 +110,9 @@ const topItemMax = computed(() => topItems.value.length > 0 ? topItems.value[0].
 
     <!-- Mang đi vs Tại võng -->
     <div class="rounded-2xl bg-white border border-gray-100 p-4 shadow-sm">
-      <h3 class="text-base font-bold text-gray-800 mb-3">🛍️ Mang đi / 🛏️ Tại võng</h3>
+      <h3 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+        <ShoppingBag class="w-4 h-4 text-amber-500" /> Mang đi / <Bed class="w-4 h-4 text-violet-500" /> Tại võng
+      </h3>
       <div v-if="totalOrders === 0" class="py-6 text-center text-gray-400">Chưa có đơn hàng</div>
       <div v-else class="flex items-center gap-4">
         <!-- Donut chart -->
@@ -140,7 +143,7 @@ const topItemMax = computed(() => topItems.value.length > 0 ? topItems.value[0].
 
     <!-- Top items -->
     <div class="rounded-2xl bg-white border border-gray-100 p-4 shadow-sm">
-      <h3 class="text-base font-bold text-gray-800 mb-3">🏆 Món bán chạy</h3>
+      <h3 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2"><Trophy class="w-5 h-5 text-amber-500" /> Món bán chạy</h3>
       <div v-if="topItems.length === 0" class="py-6 text-center text-gray-400">Chưa có dữ liệu</div>
       <div v-else class="flex flex-col gap-2">
         <div v-for="(item, idx) in topItems" :key="item.name" class="flex items-center gap-3">

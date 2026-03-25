@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type { SavedReport } from '../types'
+import { BarChart3, CalendarDays, AlertCircle, CheckCircle2, Banknote, Paperclip, Trash2, X } from 'lucide-vue-next'
 
-const props = defineProps<{ report: SavedReport }>()
+const props = defineProps<{ 
+  report: SavedReport
+  canManage?: boolean
+}>()
 const emit = defineEmits<{
   close: []
   delete: [id: string]
@@ -25,10 +29,10 @@ function formatDate(ts: number): string {
       <!-- Header -->
       <div class="sticky top-0 z-10 flex items-center justify-between bg-white px-4 pt-5 pb-3 border-b border-gray-100">
         <div>
-          <h2 class="text-xl font-bold text-gray-800">📊 {{ report.periodLabel }}</h2>
+          <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><BarChart3 class="w-6 h-6 text-blue-600" /> {{ report.periodLabel }}</h2>
           <div class="text-sm text-gray-500">Lưu lúc {{ formatDate(report.createdAt) }}</div>
         </div>
-        <button @click="emit('close')" class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-lg active:bg-gray-200">✕</button>
+        <button @click="emit('close')" class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-lg active:bg-gray-200"><X class="w-5 h-5 text-gray-600" /></button>
       </div>
 
       <div class="flex flex-col gap-4 p-4">
@@ -56,7 +60,7 @@ function formatDate(ts: number): string {
 
         <!-- Breakdown -->
         <div v-if="report.breakdown.length > 0" class="flex flex-col gap-2">
-          <h3 class="text-lg font-bold text-gray-800">📅 Chi tiết</h3>
+          <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2"><CalendarDays class="w-5 h-5 text-gray-500" /> Chi tiết</h3>
           <div
             v-for="item in report.breakdown"
             :key="item.label"
@@ -81,33 +85,36 @@ function formatDate(ts: number): string {
         >
           <div class="flex items-center justify-between mb-2">
             <span class="text-base font-bold text-gray-800">Doanh thu năm {{ report.taxYear }}</span>
-            <span class="text-sm font-medium" :class="report.yearlyIncome > report.taxThreshold ? 'text-yellow-700' : 'text-green-700'">
-              {{ report.yearlyIncome > report.taxThreshold ? '🟡 Vượt ngưỡng' : '🟢 Miễn thuế' }}
+            <span class="text-sm font-medium flex items-center gap-1" :class="report.yearlyIncome > report.taxThreshold ? 'text-yellow-700' : 'text-green-700'">
+              <AlertCircle v-if="report.yearlyIncome > report.taxThreshold" class="w-4 h-4" />
+              <CheckCircle2 v-else class="w-4 h-4" />
+              {{ report.yearlyIncome > report.taxThreshold ? 'Vượt ngưỡng' : 'Miễn thuế' }}
             </span>
           </div>
           <div class="text-xl font-bold text-gray-800 mb-2">
             {{ formatMoney(report.yearlyIncome) }} / {{ formatMoney(report.taxThreshold) }}
           </div>
           <div v-if="report.estimatedTax > 0" class="rounded-xl bg-yellow-100 px-3 py-2 mb-2">
-            <div class="text-sm font-bold text-yellow-800">
-              💰 Thuế ước tính: {{ formatMoney(report.estimatedTax) }}
+            <div class="text-sm font-bold text-yellow-800 flex items-center gap-1">
+              <Banknote class="w-4 h-4" /> Thuế ước tính: {{ formatMoney(report.estimatedTax) }}
             </div>
             <div class="text-xs text-yellow-700 mt-1">
               = ({{ formatMoney(report.yearlyIncome) }} − {{ formatMoney(report.taxThreshold) }}) × {{ (report.taxRate * 100) }}%
             </div>
           </div>
-          <div class="text-xs text-gray-500">
+          <div class="text-xs text-gray-500 mt-2">
             <div>{{ report.taxDescription }}</div>
-            <div class="mt-0.5">📎 {{ report.taxLegalBasis }}</div>
+            <div class="mt-0.5 flex items-center gap-1"><Paperclip class="w-3 h-3 text-gray-400" /> {{ report.taxLegalBasis }}</div>
           </div>
         </div>
 
         <!-- Delete button -->
         <button
+          v-if="canManage"
           @click="emit('delete', report.id)"
-          class="w-full rounded-2xl border-2 border-red-200 bg-red-50 py-4 text-lg font-bold text-red-600 active:bg-red-100 min-h-[60px]"
+          class="flex items-center justify-center gap-2 w-full rounded-2xl border-2 border-red-200 bg-red-50 py-4 text-lg font-bold text-red-600 active:bg-red-100 min-h-[60px]"
         >
-          🗑️ Xoá báo cáo này
+          <Trash2 class="w-6 h-6" /> Xoá báo cáo này
         </button>
       </div>
     </div>

@@ -2,18 +2,54 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Hàm lấy roles của user đang thao tác
+    function getRoles() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles;
+    }
+    
+    function hasRole(role) {
+      return request.auth != null && (role in getRoles());
+    }
+    
+    function isAdmin() {
+      return hasRole('admin');
+    }
 
-    // Transactions (thu/chi)
+    match /users/{userId} {
+      allow read: if request.auth != null; 
+      
+      // User tự tạo document lần đầu login, NHƯNG bắt buộc mảng roles phải rỗng (chống hack gắn role thẳng từ FE)
+      allow create: if request.auth != null 
+                    && request.auth.uid == userId 
+                    && request.resource.data.roles == [];
+                    
+      // Chỉ duy nhất ADMIN được cập nhật/thay đổi role
+      allow update, delete: if isAdmin();
+    }
+
     match /transactions/{docId} {
-      allow read, write: if true;
+      allow read: if isAdmin() || hasRole('view_reports');
+      allow create: if isAdmin() || hasRole('member');
+      allow update, delete: if isAdmin() || hasRole('edit_orders');
     }
 
-    // Saved reports (báo cáo đã lưu)
     match /savedReports/{docId} {
-      allow read, write: if true;
+      allow read: if isAdmin() || hasRole('view_reports');
+      allow write: if isAdmin() || hasRole('manage_reports');
+    }
+    
+    match /audit_logs/{docId} {
+      allow create: if request.auth != null;
+      allow read: if isAdmin();
     }
 
-    // Deny everything else
+    match /settings/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // Khóa toàn bộ các document khác
     match /{document=**} {
       allow read, write: if false;
     }
