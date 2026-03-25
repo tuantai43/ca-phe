@@ -1,8 +1,20 @@
 <script setup lang="ts">
+import { watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { Coffee } from 'lucide-vue-next'
 
-const { loginWithGoogle } = useAuth()
+const { loginWithGoogle, currentUser } = useAuth()
+const router = useRouter()
+
+// Lắng nghe sự thay đổi của State. Ngay cả khi Popup bị lỗi COOP đánh sập (Promise Crash),
+// Firebase dưới nền vẫn sẽ kích hoạt `onAuthStateChanged` và gán currentUser thành công.
+// Watcher này sẽ chớp thời cơ đó để tự động hất văng người dùng vào màn hình chính cực kỳ mượt!
+watch(currentUser, (newVal) => {
+  if (newVal) {
+    router.push('/')
+  }
+}, { immediate: true })
 </script>
 
 <template>

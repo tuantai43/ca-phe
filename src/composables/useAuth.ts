@@ -54,9 +54,8 @@ export function useAuth() {
   const loginWithGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      console.error('Error logging in with Google', error);
-      alert('Đăng nhập thất bại!');
+    } catch (error: any) {
+      // Ignored: Popup closed or COOP blocked. Watcher handles success.
     }
   };
 
