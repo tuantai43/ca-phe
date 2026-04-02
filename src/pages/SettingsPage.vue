@@ -109,7 +109,7 @@ async function submit() {
       <div class="flex flex-col gap-4">
         <div v-for="item in menuItems" :key="item.id" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-50 pb-4">
           <div class="flex items-center gap-3">
-            <component :is="item.icon" class="w-6 h-6 text-amber-600" />
+            <span class="text-2xl leading-none">{{ item.icon }}</span>
             <span class="font-semibold text-gray-800 text-lg">{{ item.name }}</span>
           </div>
           <div class="flex flex-row items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
