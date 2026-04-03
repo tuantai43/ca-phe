@@ -10,6 +10,18 @@ export default defineConfig({
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "firebase-app": ["firebase/app"],
+          "firebase-auth": ["firebase/auth"],
+          "firebase-firestore": ["firebase/firestore"],
+          "vue-vendor": ["vue", "vue-router"],
+        },
+      },
+    },
+  },
   plugins: [
     vue(),
     tailwindcss(),

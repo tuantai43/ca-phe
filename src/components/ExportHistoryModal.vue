@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useTransactions } from '../composables/useTransactions'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useTransactionQuery } from '../composables/useTransactions'
 import DatePickerModal from './DatePickerModal.vue'
 
 const emit = defineEmits<{ close: [] }>()
-const { allTransactions } = useTransactions()
+const { transactions: filtered, listenByRange } = useTransactionQuery()
 
 const now = new Date()
 
@@ -28,17 +28,16 @@ const endDate = computed(() => fromInputDate(endStr.value))
 const showStartPicker = ref(false)
 const showEndPicker = ref(false)
 
-// Filtered transactions
-function inRange(ts: number): boolean {
-  const d = new Date(ts)
-  const day = new Date(d.getFullYear(), d.getMonth(), d.getDate())
-  return day >= startDate.value && day <= endDate.value
+// Query Firestore theo range khi date thay đổi
+function refreshQuery() {
+  listenByRange(startDate.value, endDate.value)
 }
+watch([startStr, endStr], refreshQuery)
+onMounted(refreshQuery)
 
-const filtered = computed(() =>
-  allTransactions.value
-    .filter(t => inRange(t.createdAt))
-    .sort((a, b) => a.createdAt - b.createdAt)
+// Sort ascending for export
+const sortedFiltered = computed(() =>
+  [...filtered.value].sort((a, b) => a.createdAt - b.createdAt)
 )
 
 function formatDate(d: Date): string {
@@ -56,7 +55,7 @@ function exportCSV() {
 
   const BOM = '\uFEFF'
   const header = 'Ngày,Giờ,Loại,Mô tả,Danh mục,Số tiền\n'
-  const rows = filtered.value.map(t => {
+  const rows = sortedFiltered.value.map(t => {
     const d = new Date(t.createdAt)
     const date = formatDate(d)
     const time = d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0')

@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import {
   initializeFirestore,
   persistentLocalCache,
-  persistentMultipleTabManager,
+  persistentSingleTabManager,
 } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
@@ -20,9 +20,9 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
-// Firestore with offline persistence (multi-tab)
+// Firestore with offline persistence (single-tab — PWA standalone chỉ chạy 1 tab)
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager(),
+    tabManager: persistentSingleTabManager({ forceOwnership: true }),
   }),
 });

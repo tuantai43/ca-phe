@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useTransactions } from '../composables/useTransactions'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useTransactionActions, useTransactionQuery } from '../composables/useTransactions'
 import { useSavedReports } from '../composables/useSavedReports'
 import { getTaxRule, estimateTax } from '../data/taxRules'
 import type { SavedReport, Transaction, ExpenseCategory, TransactionOrderItem } from '../types'
@@ -16,7 +16,10 @@ import {
 } from 'lucide-vue-next'
 import { useAuth } from '../composables/useAuth'
 import { useRouter } from 'vue-router'
-const { allTransactions, updateTransaction, deleteTransaction } = useTransactions()
+
+const { updateTransaction, deleteTransaction } = useTransactionActions()
+const periodQuery = useTransactionQuery()
+const yearQuery = useTransactionQuery()
 const { hasRole } = useAuth()
 const router = useRouter()
 
@@ -28,6 +31,23 @@ const now = new Date()
 const selectedDate = ref(new Date())
 const selectedMonth = ref(now.getMonth())
 const selectedYear = ref(now.getFullYear())
+
+// --- Khi thay đổi period/date → re-query Firestore ---
+function refreshQueries() {
+  if (period.value === 'day') {
+    periodQuery.listenByDay(selectedDate.value)
+    yearQuery.listenByYear(selectedDate.value.getFullYear())
+  } else if (period.value === 'month') {
+    periodQuery.listenByMonth(selectedMonth.value, selectedYear.value)
+    yearQuery.listenByYear(selectedYear.value)
+  } else {
+    periodQuery.listenByYear(selectedYear.value)
+    yearQuery.stop() // Dữ liệu năm đã nằm trong periodQuery
+  }
+}
+
+watch([period, selectedDate, selectedMonth, selectedYear], refreshQueries)
+onMounted(refreshQueries)
 
 watch(period, () => {
   selectedDate.value = new Date()
@@ -83,28 +103,8 @@ const canNextMonth = computed(() =>
 )
 const canNextYear = computed(() => selectedYear.value < now.getFullYear())
 
-// Filters
-function isSelectedDay(ts: number) {
-  const d = new Date(ts)
-  const sel = selectedDate.value
-  return d.getFullYear() === sel.getFullYear()
-    && d.getMonth() === sel.getMonth()
-    && d.getDate() === sel.getDate()
-}
-function isSelectedMonth(ts: number) {
-  const d = new Date(ts)
-  return d.getFullYear() === selectedYear.value && d.getMonth() === selectedMonth.value
-}
-function isSelectedYear(ts: number) {
-  return new Date(ts).getFullYear() === selectedYear.value
-}
-
-const filtered = computed(() => {
-  const filter = period.value === 'day' ? isSelectedDay
-    : period.value === 'month' ? isSelectedMonth
-    : isSelectedYear
-  return allTransactions.value.filter(t => filter(t.createdAt))
-})
+// --- Data đã được query sẵn theo period, không cần filter client-side ---
+const filtered = computed(() => periodQuery.transactions.value)
 
 const totalIncome = computed(() =>
   filtered.value.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
@@ -124,11 +124,17 @@ const taxYear = computed(() => {
   return now.getFullYear()
 })
 const taxRule = computed(() => getTaxRule(taxYear.value))
-const yearlyIncome = computed(() =>
-  allTransactions.value
-    .filter(t => new Date(t.createdAt).getFullYear() === taxYear.value && t.type === 'income')
+
+// Khi xem theo năm → dùng periodQuery, còn lại → dùng yearQuery
+const yearlyIncome = computed(() => {
+  const source = period.value === 'year'
+    ? periodQuery.transactions.value
+    : yearQuery.transactions.value
+  return source
+    .filter(t => t.type === 'income')
     .reduce((s, t) => s + t.amount, 0)
-)
+})
+
 const taxThreshold = computed(() => taxRule.value?.threshold ?? 500_000_000)
 const taxPercent = computed(() => Math.min((yearlyIncome.value / taxThreshold.value) * 100, 100))
 const estimatedTax = computed(() => {

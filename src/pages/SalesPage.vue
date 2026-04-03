@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import type { OrderType } from '../types'
 import { menuItems } from '../data/menu'
-import { useTransactions } from '../composables/useTransactions'
+import { useTransactionActions } from '../composables/useTransactions'
 import { useCartStore } from '../composables/useCartStore'
 import OrderTabs from '../components/OrderTabs.vue'
 import NewOrderModal from '../components/NewOrderModal.vue'
@@ -11,7 +11,7 @@ import CartPanel from '../components/CartPanel.vue'
 import { Coffee } from 'lucide-vue-next'
 import { useMasterData } from '../composables/useMasterData'
 
-const { addTransaction } = useTransactions()
+const { addTransaction } = useTransactionActions()
 const { masterData } = useMasterData()
 const cartStore = useCartStore()
 

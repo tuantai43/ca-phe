@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useTransactions } from '../composables/useTransactions'
+import { useTransactionActions } from '../composables/useTransactions'
 import { useMasterData } from '../composables/useMasterData'
 import { PlusCircle, CheckCircle2 } from 'lucide-vue-next'
 import type { ExpenseCategory } from '../types'
 
-const { addTransaction } = useTransactions()
+const { addTransaction } = useTransactionActions()
 const { masterData } = useMasterData()
 const router = useRouter()
 
