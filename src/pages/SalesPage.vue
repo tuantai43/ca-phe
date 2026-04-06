@@ -42,24 +42,39 @@ function getOrderLabel(type: OrderType, hammocks: number[]): string {
   return 'Võng ' + hammocks.join(', ')
 }
 
+const isSubmitting = computed(() => {
+  const order = cartStore.activeOrder.value
+  return order ? cartStore.isSubmitting(order.id) : false
+})
+
 async function confirmOrder() {
   const order = cartStore.activeOrder.value
   if (!order || order.items.length === 0) return
   
-  // Lưu giao dịch thu
-  const priceKey = order.type === 'takeaway' ? 'priceTakeaway' : 'priceHammock'
-  const items = order.items.map(i => ({ 
-    name: i.menuItem.name, 
-    quantity: i.quantity,
-    price: i.menuItem[priceKey]
-  }))
-  const total = activeTotal.value
+  // Chặn double-submit
+  if (cartStore.isSubmitting(order.id)) return
+  cartStore.setSubmitting(order.id, true)
   
-  await addTransaction('income', 'Đơn ' + getOrderLabel(order.type, order.hammocks), total, undefined, items, order.type)
-  alert(`Đã thu ${total.toLocaleString('vi-VN')}đ`)
-  
-  // Remove committed order from cart store
-  cartStore.removeOrder(order.id)
+  try {
+    // Lưu giao dịch thu
+    const priceKey = order.type === 'takeaway' ? 'priceTakeaway' : 'priceHammock'
+    const items = order.items.map(i => ({ 
+      name: i.menuItem.name, 
+      quantity: i.quantity,
+      price: i.menuItem[priceKey]
+    }))
+    const total = activeTotal.value
+    
+    await addTransaction('income', 'Đơn ' + getOrderLabel(order.type, order.hammocks), total, undefined, items, order.type)
+    alert(`Đã thu ${total.toLocaleString('vi-VN')}đ`)
+    
+    // Remove committed order from cart store
+    cartStore.removeOrder(order.id)
+  } catch (error) {
+    console.error(error)
+    alert('Lỗi khi lưu đơn hàng, vui lòng thử lại')
+    cartStore.setSubmitting(order.id, false)
+  }
 }
 </script>
 
@@ -101,6 +116,7 @@ async function confirmOrder() {
         :items="cartStore.activeOrder.value.items"
         :total="activeTotal"
         :order-type="cartStore.activeOrder.value.type"
+        :is-submitting="isSubmitting"
         @confirm="confirmOrder"
         @clear="cartStore.clearCart"
         @increment="cartStore.increment"

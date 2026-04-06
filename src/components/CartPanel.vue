@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { CartItem, OrderType } from '../types'
-import { ReceiptText, X, CheckCircle } from 'lucide-vue-next'
+import { ReceiptText, X, CheckCircle, Loader2 } from 'lucide-vue-next'
 import MenuIcon from './MenuIcon.vue'
 
 defineProps<{
   items: CartItem[]
   total: number
   orderType: OrderType
+  isSubmitting?: boolean
 }>()
 
 defineEmits<{
@@ -104,9 +105,15 @@ function getPrice(item: CartItem, type: OrderType): number {
       </div>
       <button
         @click="$emit('confirm')"
-        class="flex items-center justify-center gap-2 w-full rounded-2xl bg-green-700 py-4 text-xl font-bold text-white shadow-lg active:bg-green-800 min-h-[60px]"
+        :disabled="isSubmitting"
+        class="flex items-center justify-center gap-2 w-full rounded-2xl py-4 text-xl font-bold text-white shadow-lg min-h-[60px] transition-colors"
+        :class="isSubmitting
+          ? 'bg-gray-400 cursor-not-allowed'
+          : 'bg-green-700 active:bg-green-800'"
       >
-        <CheckCircle class="w-6 h-6" /> Xác nhận & Thu tiền
+        <Loader2 v-if="isSubmitting" class="w-6 h-6 animate-spin" />
+        <CheckCircle v-else class="w-6 h-6" />
+        {{ isSubmitting ? 'Đang xử lý...' : 'Xác nhận & Thu tiền' }}
       </button>
     </div>
   </div>

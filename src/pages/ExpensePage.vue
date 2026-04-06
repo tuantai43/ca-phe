@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTransactionActions } from '../composables/useTransactions'
 import { useMasterData } from '../composables/useMasterData'
-import { PlusCircle, CheckCircle2 } from 'lucide-vue-next'
+import { PlusCircle, CheckCircle2, Loader2 } from 'lucide-vue-next'
 import type { ExpenseCategory } from '../types'
 
 const { addTransaction } = useTransactionActions()
@@ -14,6 +14,7 @@ const description = ref('')
 const amountStr = ref('0')
 const category = ref<ExpenseCategory>('khac')
 const showSuccess = ref(false)
+const isSubmitting = ref(false)
 
 const amountNumber = computed(() => parseInt(amountStr.value) || 0)
 
@@ -77,7 +78,9 @@ function formatDisplay(val: number): string {
 
 async function submit() {
   if (!description.value.trim() || amountNumber.value <= 0) return
+  if (isSubmitting.value) return
   
+  isSubmitting.value = true
   try {
     await addTransaction('expense', description.value.trim(), amountNumber.value, category.value)
     showSuccess.value = true
@@ -86,11 +89,13 @@ async function submit() {
       description.value = ''
       category.value = 'khac'
       showSuccess.value = false
+      isSubmitting.value = false
       router.push('/sales')
     }, 1500)
   } catch (error) {
     console.error(error)
     alert('Lỗi khi lưu khoản chi')
+    isSubmitting.value = false
   }
 }
 </script>
@@ -170,13 +175,16 @@ async function submit() {
       <!-- Button lưu -->
       <button
         @click="submit"
-        :disabled="!description.trim() || amountNumber <= 0"
-        class="w-full flex justify-center items-center rounded-2xl py-4 text-xl font-bold text-white shadow-lg transition-colors min-h-[60px]"
-        :class="description.trim() && amountNumber > 0
-          ? 'bg-red-600 active:bg-red-700'
-          : 'bg-gray-300 cursor-not-allowed'"
+        :disabled="!description.trim() || amountNumber <= 0 || isSubmitting"
+        class="w-full flex justify-center items-center gap-2 rounded-2xl py-4 text-xl font-bold text-white shadow-lg transition-colors min-h-[60px]"
+        :class="isSubmitting
+          ? 'bg-gray-400 cursor-not-allowed'
+          : (description.trim() && amountNumber > 0
+            ? 'bg-red-600 active:bg-red-700'
+            : 'bg-gray-300 cursor-not-allowed')"
       >
-        Lưu Phiếu Chi
+        <Loader2 v-if="isSubmitting" class="w-6 h-6 animate-spin" />
+        {{ isSubmitting ? 'Đang lưu...' : 'Lưu Phiếu Chi' }}
       </button>
     </div>
   </div>
